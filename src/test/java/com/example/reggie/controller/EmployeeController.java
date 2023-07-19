@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
@@ -50,11 +51,22 @@ public class EmployeeController {
     }
 
     /**
-     *
+     * log out
+     * @param request
+     * @return
      */
     @PostMapping("/logout")
     public R<String> logout(HttpServletRequest request){
         request.getSession().removeAttribute("employee");
         return R.success("logout successfully");
+    }
+    @PostMapping
+    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
+        //set initial password to 123456
+        String password = DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8));
+        employee.setPassword(password);
+        //save employee
+        employeeService.save(employee);
+        return R.success("add employee success");
     }
 }
