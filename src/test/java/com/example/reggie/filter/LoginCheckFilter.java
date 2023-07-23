@@ -46,7 +46,7 @@ public class LoginCheckFilter implements Filter {
 
         //if no processing required, released
         if(check){
-            log.info("this request {} don't need to process",requestURI);
+            log.info("this request {} doesn't need to process",requestURI);
             filterChain.doFilter(request,response);
             return;
         }

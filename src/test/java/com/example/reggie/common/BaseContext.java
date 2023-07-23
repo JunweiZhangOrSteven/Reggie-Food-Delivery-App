@@ -1,7 +1,8 @@
 package com.example.reggie.common;
 
 /**
- * base on ThreadLocal Encapsulates utility class, store userId and get current user id
+ *
+ * base on ThreadLocal Encapsulates utility class, save userId and get current user id
  */
 public class BaseContext {
     private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
