@@ -1,19 +1,19 @@
 package com.example.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.reggie.common.R;
 import com.example.reggie.entity.Employee;
 import com.example.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -65,8 +65,50 @@ public class EmployeeController {
         //set initial password to 123456
         String password = DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8));
         employee.setPassword(password);
+
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        //get current user id
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        employee.setCreateUser(empId);
+        employee.setUpdateUser(empId);
+
         //save employee
         employeeService.save(employee);
         return R.success("add employee success");
+    }
+
+    @GetMapping("/page")
+    public R<Page> page(int page,int pageSize,String name){
+
+        //1.create page constructor
+        Page pageInfo = new Page(page,pageSize);
+
+        //2.create lambda wrapper
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        //3.add filtering condition
+        queryWrapper.like(!StringUtils.isEmpty(name),Employee::getName,name);
+        //4.execute query
+        employeeService.page(pageInfo,queryWrapper);
+        return R.success(pageInfo);
+    }
+
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        employee.setUpdateUser(empId);
+        employee.setUpdateTime(LocalDateTime.now());
+        employeeService.updateById(employee);
+
+        return R.success("employee info has been updated successfully");
+    }
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id){
+        Employee employee = employeeService.getById(id);
+        if(employee != null){
+            return R.success(employee);
+        }
+        return R.error("Employee Not Found");
     }
 }
