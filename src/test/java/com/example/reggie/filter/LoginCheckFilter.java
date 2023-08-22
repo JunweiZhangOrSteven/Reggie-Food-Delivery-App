@@ -51,7 +51,7 @@ public class LoginCheckFilter implements Filter {
             return;
         }
 
-        //determine login status, if login, release
+        //determine backend login status, if login, release
         if(request.getSession().getAttribute("employee") != null){
             log.info("user login, id is {}",request.getSession().getAttribute("employee"));
             Long empId = (Long) request.getSession().getAttribute("employee");
@@ -61,6 +61,7 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request,response);
             return;
         }
+        //determine frontend login status, if login, release
         if(request.getSession().getAttribute("user") != null){
             log.info("user iog in, id :{}",request.getSession().getAttribute("user"));
 
